@@ -11,24 +11,30 @@ export default function LoanCalculator() {
   const [emi, setEmi] = useState(null);
   const [results, setResults] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleCalculate = () => {
     if (!principal || !interestRate || !emi) {
       return;
     }
 
-    const { results: calculatedResults, history } = calculateLoanPayments(
-      principal,
-      interestRate,
-      emi
-    );
+    setLoading(true);
 
-    setResults(calculatedResults);
-    setPaymentHistory(history);
+    // Simulate delay for better UX
+    setTimeout(() => {
+      const { results: calculatedResults, history } = calculateLoanPayments(
+        principal,
+        interestRate,
+        emi
+      );
+
+      setResults(calculatedResults);
+      setPaymentHistory(history);
+      setLoading(false);
+    }, 300); // Adjust delay as needed
   };
 
   useEffect(() => {
-    // Avoid initial calculation with null values
     if (principal && interestRate && emi) {
       handleCalculate();
     }
@@ -50,9 +56,19 @@ export default function LoanCalculator() {
         onCalculate={handleCalculate}
       />
 
-      {results && <LoanSummary results={results} />}
+      {/* Loader */}
+      {loading && (
+        <div className="flex flex-col items-center my-6">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm text-blue-600 mt-2">Calculating...</p>
+        </div>
+      )}
 
-      {paymentHistory.length > 0 && (
+      {/* Results */}
+      {!loading && results && <LoanSummary results={results} />}
+
+      {/* Payment Table */}
+      {!loading && paymentHistory.length > 0 && (
         <PaymentSchedule paymentHistory={paymentHistory} />
       )}
     </div>
